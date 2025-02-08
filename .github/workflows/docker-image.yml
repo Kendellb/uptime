@@ -1,17 +1,34 @@
-name: Build and Deploy Go Uptime Monitor
+name: Build, Test, and Deploy Go Uptime Monitor
 
 on:
   push:
     branches:
-      - main  # Runs when pushing to the main branch
+      - main
   pull_request:
     branches:
-      - main  # Runs on pull requests targeting main
+      - main
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Download dependencies
+        run: go mod tidy
+
+      - name: Run Tests
+        run: go test -v ./...
+
+  build-and-push:
+    needs: test  # Ensure tests pass before building
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -35,3 +52,4 @@ jobs:
 
       - name: Verify Docker Image
         run: docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/go-uptime-app:latest uptime
+
