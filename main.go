@@ -1,12 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
 	"os/exec"
 	"strings"
-    "log"
+	"log"
 )
 
 const htmlTemplate = `
@@ -34,7 +35,7 @@ func getUptime() (string, error) {
 		return "Unknown uptime format", nil
 	}
 
-    uptimeIndex := strings.Index(string(output), "up ")
+	uptimeIndex := strings.Index(string(output), "up ")
 	if uptimeIndex == -1 {
 		return "Unknown uptime format", nil
 	}
@@ -48,11 +49,11 @@ func getUptime() (string, error) {
 	return strings.TrimSpace(uptime), nil
 }
 
-func min(a,b int) int {
-    if a < b {
-        return a
-    }
-    return b
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func uptimeHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,19 +66,43 @@ func uptimeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, uptime)
 }
 
+func uptimeAPIHandler(w http.ResponseWriter, r *http.Request) {
+	uptime, err := getUptime()
+	if err != nil {
+		http.Error(w, "Failed to get uptime", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the response header to application/json
+	w.Header().Set("Content-Type", "application/json")
+
+	// Create a map to hold the uptime response
+	response := map[string]string{
+		"uptime": uptime,
+	}
+
+	// Return uptime as a JSON response
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+	}
+}
+
 func main() {
-    // Serve static files from the "static" directory
-    fs := http.FileServer(http.Dir("./static"))
-    http.Handle("/static/", http.StripPrefix("/static", fs))
+	// Serve static files from the "static" directory
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static", fs))
 
-    // Handle uptime endpoint
-    http.HandleFunc("/", uptimeHandler)
+	// Handle uptime HTML endpoint
+	http.HandleFunc("/", uptimeHandler)
 
-    fmt.Println("Server running on http://localhost:8080")
-    
-    // Start server and log errors
-    if err := http.ListenAndServe(":8080", nil); err != nil {
-        log.Fatal(err) // Log any errors that occur
-    }
+	// Handle uptime API endpoint
+	http.HandleFunc("/api/uptime", uptimeAPIHandler)
+
+	fmt.Println("Server running on http://localhost:8080")
+	
+	// Start server and log errors
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err) // Log any errors that occur
+	}
 }
 

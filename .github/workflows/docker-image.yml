@@ -26,8 +26,34 @@ jobs:
       - name: Run Tests
         run: go test -v ./...
 
+  postman-tests:
+    needs: test  # Ensure tests pass before running Postman tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Postman tests
+        run: |
+          newman run postman/your_collection.json --environment postman/your_environment.json
+
+      # Optional: Upload test results for visibility
+      - name: Upload Postman test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: postman-test-results
+          path: postman-test-results.json
+
   build-and-push:
-    needs: test  # Ensure tests pass before building
+    needs: [test, postman-tests]  # Ensure tests and Postman tests pass before building
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
