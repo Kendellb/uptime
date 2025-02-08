@@ -34,14 +34,25 @@ func getUptime() (string, error) {
 		return "Unknown uptime format", nil
 	}
 
-	// Extract only the first part of uptime (e.g., "up 3 days, 4:15")
-	uptimeStartIndex := strings.Index(string(output), "up ")
-	if uptimeStartIndex == -1 {
+    uptimeIndex := strings.Index(string(output), "up ")
+	if uptimeIndex == -1 {
 		return "Unknown uptime format", nil
 	}
 
-	uptime := strings.SplitN(string(output[uptimeStartIndex+3:]), ",", 2)[0] // Extract the first part only
+	// Extract the uptime portion after "up "
+	uptimeStr := string(output[uptimeIndex+3:])
+	parts := strings.Split(uptimeStr, ",")
+
+	// Extract at most first two components (to get both days and hours)
+	uptime := strings.Join(parts[:min(len(parts), 2)], ",")
 	return strings.TrimSpace(uptime), nil
+}
+
+func min(a,b int) int {
+    if a < b {
+        return a
+    }
+    return b
 }
 
 func uptimeHandler(w http.ResponseWriter, r *http.Request) {
