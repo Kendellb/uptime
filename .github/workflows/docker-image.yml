@@ -43,7 +43,7 @@ jobs:
 
       - name: Run Postman tests
         run: |
-          newman run postman/your_collection.json --environment postman/your_environment.json
+          newman run postman/api_test.json --environment postman/html_tests.json
 
       # Optional: Upload test results for visibility
       - name: Upload Postman test results
