@@ -1,0 +1,13 @@
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Content-Type is HTML", function () {
+    pm.response.to.have.header("Content-Type", "text/html; charset=utf-8");
+});
+
+pm.test("Uptime text is present", function () {
+    var responseBody = pm.response.text();
+    pm.expect(responseBody).to.include("System Uptime");
+});
+

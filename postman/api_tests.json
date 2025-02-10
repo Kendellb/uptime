@@ -1,0 +1,18 @@
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Content-Type is JSON", function () {
+    pm.response.to.have.header("Content-Type", "application/json; charset=utf-8");
+});
+
+pm.test("Response contains uptime", function () {
+    var jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property("uptime");
+});
+
+pm.test("Uptime is in correct format", function () {
+    var jsonData = pm.response.json();
+    pm.expect(jsonData.uptime).to.match(/^up (\d+ days?,? \d+ hours?)/);
+});
+
