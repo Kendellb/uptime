@@ -42,12 +42,7 @@ jobs:
         run: npm install -g newman
 
       - name: Run Postman tests
-        run: |
-<<<<<<< HEAD
-          newman run postman/api_tests.json postman/html_tests.json
-=======
-          newman run postman/uptime.postman_collection.json
->>>>>>> 55c08b1 (added postman api tests)
+        run: newman run postman/uptime.postman_collection.json
 
       # Optional: Upload test results for visibility
       - name: Upload Postman test results
