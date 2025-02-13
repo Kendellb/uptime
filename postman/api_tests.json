@@ -3,7 +3,7 @@ pm.test("Status code is 200", function () {
 });
 
 pm.test("Content-Type is JSON", function () {
-    pm.response.to.have.header("Content-Type", "application/json; charset=utf-8");
+    pm.response.to.have.header("Content-Type", "application/json");
 });
 
 pm.test("Response contains uptime", function () {
@@ -13,6 +13,6 @@ pm.test("Response contains uptime", function () {
 
 pm.test("Uptime is in correct format", function () {
     var jsonData = pm.response.json();
-    pm.expect(jsonData.uptime).to.match(/^up (\d+ days?,? \d+ hours?)/);
+    pm.expect(jsonData.uptime).to.match(/^\d+ days?, \d{1,2}:\d{2}$/);
 });
 
