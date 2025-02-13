@@ -27,11 +27,25 @@ jobs:
         run: go test -v ./...
 
   postman-tests:
-    needs: test  # Ensure tests pass before running Postman tests
+    needs: test  # Ensure Go tests pass before running Postman tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build Go API
+        run: go build -o uptime-monitor
+
+      - name: Start Go API in the background
+        run: ./uptime-monitor &
+
+      - name: Wait for API to be ready
+        run: sleep 5 # Adjust this if your API takes longer to start
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -52,7 +66,7 @@ jobs:
           path: postman-test-results.json
 
   build-and-push:
-    needs: [test, postman-tests]  # Ensure tests and Postman tests pass before building
+    needs: [test, postman-tests]  # Ensure all tests pass before building
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -77,4 +91,3 @@ jobs:
 
       - name: Verify Docker Image
         run: docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/go-uptime-app:latest uptime
-
