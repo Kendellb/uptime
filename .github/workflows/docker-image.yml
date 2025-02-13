@@ -46,7 +46,7 @@ jobs:
 
       # Optional: Upload test results for visibility
       - name: Upload Postman test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: postman-test-results
           path: postman-test-results.json
